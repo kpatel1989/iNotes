@@ -1,70 +1,80 @@
 //
 //  ViewController.swift
-//  iNotes
+//  CoreDataAssignment
 //
-//  Created by Kartik Patel on 2017-03-28.
-//  Copyright © 2017 Kartik Patel. All rights reserved.
+//  Created by Damini Verma on 2017-04-07.
+//  Copyright © 2017 Damini Verma. All rights reserved.
 //
 
 import UIKit
+import CoreData
 
-class ViewController: UIViewController, UITableViewDataSource {
+class ViewController: UIViewController {
+    
+    @IBOutlet weak var noteTitle: UITextField!
+    
+    @IBOutlet weak var noteDescription: UITextField!
+    var appDelegate:AppDelegate!
+    var context:NSManagedObjectContext!
+    
+//    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
-    var data:[String]!
-    @IBOutlet var table: UITableView!
+    
+    
+    var nNotes : List? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationItem.leftBarButtonItem = editButtonItem
-        load()
+        // Do any additional setup after loading the view, typically from a nib.
+        appDelegate = (UIApplication.shared.delegate as! AppDelegate)
+        context = appDelegate.persistentContainer.viewContext
+        if nNotes != nil {
+            noteTitle.text = nNotes?.title
+            noteDescription.text = nNotes?.desc
+        }
     }
-    
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return data.count
+    @IBAction func cancelBtn(_ sender: UIBarButtonItem) {
+        back()
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "notesTableCell", for: indexPath);
-        cell.textLabel?.text = data[indexPath.row]
-        return cell
-    }
     
-    @IBAction func addBtnClick(_ sender: UIBarButtonItem) {
-        data.insert("Row \(data.count+1)", at: 0)
-        let indexPath: IndexPath = IndexPath(row: 0, section: 0)
-        table.insertRows(at: [indexPath], with: .left)
-        save()
-    }
-    
-    override func setEditing(_ editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated:animated)
-        table.setEditing(editing, animated:animated)
-    }
-    
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        data.remove(at: indexPath.row)
-        table.deleteRows(at: [indexPath], with: .right)
-        save()
-    }
-    
-    func save() {
-        UserDefaults.standard.set(data, forKey: "notes")
-        UserDefaults.standard.synchronize()
-    }
-    
-    func load() {
-        if let loadedData = UserDefaults.standard.value(forKey: "notes") as? [String] {
-             data = loadedData
-            table.reloadData()
-        } else{
-            data = []
+    @IBAction func saveBtn(_ sender: UIBarButtonItem) {
+        if nNotes != nil{
+            editNote()
         }
+        else{
+            newNote()
+        }
+        
+        back()
+    }
+    
+    func newNote()
+    {
+        let entity = NSEntityDescription.entity(forEntityName: "List", in: context)
+        let nNote = List(entity: entity!, insertInto: context)
+        nNote.title = noteTitle.text
+        nNote.desc = noteDescription.text
+        print(nNote.desc)
+        appDelegate.saveContext()
+        
+    }
+    
+    
+    func editNote(){
+        nNotes?.title = noteTitle.text
+        nNotes?.desc = noteDescription.text
+        appDelegate.saveContext()
+    }
+    
+    func back()
+    {
+        navigationController?.popViewController(animated: true)
     }
 }
-
