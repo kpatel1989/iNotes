@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class ViewController: UIViewController {
+class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigationControllerDelegate {
     
     @IBOutlet weak var noteTitle: UITextField!
     
@@ -20,6 +20,7 @@ class ViewController: UIViewController {
 //    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     
+    @IBOutlet weak var imageView: UIImageView!
     
     var nNotes : List? = nil
     
@@ -31,6 +32,7 @@ class ViewController: UIViewController {
         if nNotes != nil {
             noteTitle.text = nNotes?.title
             noteDescription.text = nNotes?.desc
+            imageView.image = UIImage(data: (nNotes?.image?.data(using: String.Encoding.utf8))!)
         }
     }
     
@@ -43,6 +45,26 @@ class ViewController: UIViewController {
         back()
     }
     
+    @IBAction func clickPhoto(_ sender: UIButton) {
+        if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera)) {
+            let imagePicker = UIImagePickerController()
+            imagePicker.delegate = self
+            imagePicker.sourceType = UIImagePickerControllerSourceType.camera
+            imagePicker.allowsEditing = false
+            self.present(imagePicker, animated: true, completion: nil)
+        } else {
+            let imagePicker = UIImagePickerController()
+            imagePicker.delegate = self
+            imagePicker.sourceType = UIImagePickerControllerSourceType.photoLibrary
+            imagePicker.allowsEditing = false
+            self.present(imagePicker, animated: true, completion: nil)
+        }
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+        imageView.image = info[UIImagePickerControllerOriginalImage] as? UIImage
+    }
     
     @IBAction func saveBtn(_ sender: UIBarButtonItem) {
         if nNotes != nil{
@@ -61,7 +83,12 @@ class ViewController: UIViewController {
         let nNote = List(entity: entity!, insertInto: context)
         nNote.title = noteTitle.text
         nNote.desc = noteDescription.text
-        print(nNote.desc)
+        
+        print(nNote.desc!)
+        
+        let data = UIImageJPEGRepresentation(imageView.image!, 1)! as Data
+        nNote.image = String(data:data,encoding:.utf8);
+        
         appDelegate.saveContext()
         
     }
@@ -70,6 +97,9 @@ class ViewController: UIViewController {
     func editNote(){
         nNotes?.title = noteTitle.text
         nNotes?.desc = noteDescription.text
+        let data = UIImageJPEGRepresentation(imageView.image!, 1)! as Data
+        nNotes?.image = String(data:data,encoding:.utf8);
+        
         appDelegate.saveContext()
     }
     
