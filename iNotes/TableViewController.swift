@@ -15,6 +15,8 @@ class TableViewController: UITableViewController,NSFetchedResultsControllerDeleg
     var context : NSManagedObjectContext!
     
     var frc : NSFetchedResultsController<NSFetchRequestResult> = NSFetchedResultsController()
+    var imageFrc : NSFetchedResultsController<NSFetchRequestResult> = NSFetchedResultsController()
+    
     func getFetchedResultsController() -> NSFetchedResultsController<NSFetchRequestResult>{
         frc = NSFetchedResultsController(fetchRequest: listFetchRequest(), managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
         return frc
@@ -28,6 +30,18 @@ class TableViewController: UITableViewController,NSFetchedResultsControllerDeleg
         return fetchRequest
     }
     
+    func getImageFetchedResultsController(list:List) -> NSFetchedResultsController<NSFetchRequestResult>{
+        frc = NSFetchedResultsController(fetchRequest: imagesFetchRequest(list: list), managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
+        return frc
+    }
+    
+    func imagesFetchRequest(list:List) -> NSFetchRequest<NSFetchRequestResult> {
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Image")
+        
+        let whereDescriptor = NSPredicate(format: "noteId == %@",list.id)
+        fetchRequest.predicate = whereDescriptor;
+        return fetchRequest
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,6 +56,7 @@ class TableViewController: UITableViewController,NSFetchedResultsControllerDeleg
         }catch{
                 print("nil Error")
         }
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -140,6 +155,16 @@ class TableViewController: UITableViewController,NSFetchedResultsControllerDeleg
             let itemController : ViewController = segue.destination as! ViewController
             let nItem : List = frc.object(at: indexPath!) as! List
             itemController.nNotes = nItem
+            imageFrc = getFetchedResultsController()
+            do {
+                try imageFrc.performFetch()
+            } catch {
+                print("Error fetching images")
+            }
+            
+            let images : [Images] = imageFrc.fetchedObjects as! [Images];
+            itemController.images = images
+            
         }
     }
     

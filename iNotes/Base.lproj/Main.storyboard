@@ -1,11 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1421" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="jWc-eY-t3Y">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="jWc-eY-t3Y">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -79,34 +80,78 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Title" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="5kk-oG-JUq">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Title" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="5kk-oG-JUq">
                                 <rect key="frame" x="16" y="82" width="270" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <nil key="textColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Description" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="AFL-E1-Dbf">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Description" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="AFL-E1-Dbf">
                                 <rect key="frame" x="16" y="120" width="270" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <nil key="textColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="h3M-Mh-Ajp">
-                                <rect key="frame" x="16" y="158" width="270" height="380"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9U7-sw-ofb">
-                                <rect key="frame" x="19" y="546" width="90" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Click a Photo"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9U7-sw-ofb">
+                                <rect key="frame" x="19" y="158" width="84" height="30"/>
+                                <state key="normal" title="Add a photo"/>
                                 <connections>
                                     <action selector="clickPhoto:" destination="BYZ-38-t0r" eventType="touchUpInside" id="zIk-sV-8Kx"/>
                                 </connections>
                             </button>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" directionalLockEnabled="YES" showsVerticalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2FF-dQ-MDy">
+                                <rect key="frame" x="19" y="208" width="340" height="128"/>
+                                <subviews>
+                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="rBu-BX-WRz">
+                                        <rect key="frame" x="0.0" y="-8" width="340" height="128"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="xzC-cH-Gj6">
+                                            <size key="itemSize" width="50" height="50"/>
+                                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                        </collectionViewFlowLayout>
+                                        <cells>
+                                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="imageCell" id="DwH-8l-i9j">
+                                                <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                                                    <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                </view>
+                                            </collectionViewCell>
+                                        </cells>
+                                        <connections>
+                                            <outlet property="dataSource" destination="BYZ-38-t0r" id="n0D-ux-Cpe"/>
+                                            <outlet property="delegate" destination="BYZ-38-t0r" id="Kei-Em-lwI"/>
+                                        </connections>
+                                    </collectionView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="rBu-BX-WRz" firstAttribute="centerY" secondItem="2FF-dQ-MDy" secondAttribute="centerY" id="5mp-Af-4vg"/>
+                                    <constraint firstItem="rBu-BX-WRz" firstAttribute="leading" secondItem="2FF-dQ-MDy" secondAttribute="leading" id="6xT-Cq-lR7"/>
+                                    <constraint firstAttribute="bottom" secondItem="rBu-BX-WRz" secondAttribute="bottom" id="I2M-gs-t17"/>
+                                    <constraint firstItem="rBu-BX-WRz" firstAttribute="centerX" secondItem="2FF-dQ-MDy" secondAttribute="centerX" id="aeF-Mu-x4N"/>
+                                    <constraint firstAttribute="trailing" secondItem="rBu-BX-WRz" secondAttribute="trailing" id="dDx-SN-n5e"/>
+                                    <constraint firstItem="rBu-BX-WRz" firstAttribute="top" secondItem="2FF-dQ-MDy" secondAttribute="top" id="p0t-WF-WVH"/>
+                                </constraints>
+                            </scrollView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="5kk-oG-JUq" secondAttribute="trailing" constant="73" id="9Ba-D6-We2"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="2FF-dQ-MDy" secondAttribute="bottom" constant="331" id="9Sd-21-Yna"/>
+                            <constraint firstItem="5kk-oG-JUq" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="U7V-RO-kMX"/>
+                            <constraint firstItem="5kk-oG-JUq" firstAttribute="trailing" secondItem="AFL-E1-Dbf" secondAttribute="trailing" id="UBO-nm-9Wx"/>
+                            <constraint firstItem="5kk-oG-JUq" firstAttribute="leading" secondItem="AFL-E1-Dbf" secondAttribute="leading" id="WSz-tf-gdS"/>
+                            <constraint firstItem="9U7-sw-ofb" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="3" id="X1O-oK-GL7"/>
+                            <constraint firstItem="2FF-dQ-MDy" firstAttribute="top" secondItem="9U7-sw-ofb" secondAttribute="bottom" constant="20" id="gRe-XK-qHV"/>
+                            <constraint firstItem="9U7-sw-ofb" firstAttribute="leading" secondItem="2FF-dQ-MDy" secondAttribute="leading" id="ga6-PR-NM2"/>
+                            <constraint firstItem="AFL-E1-Dbf" firstAttribute="top" secondItem="5kk-oG-JUq" secondAttribute="bottom" constant="8" symbolic="YES" id="iWS-fK-X52"/>
+                            <constraint firstItem="9U7-sw-ofb" firstAttribute="top" secondItem="AFL-E1-Dbf" secondAttribute="bottom" constant="8" symbolic="YES" id="pTX-1T-a9m"/>
+                            <constraint firstItem="2FF-dQ-MDy" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="uch-U7-FlO"/>
+                            <constraint firstItem="5kk-oG-JUq" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="18" id="y8N-wJ-d3k"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Add / Edit Item" id="W9e-24-4Wa">
                         <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="m2H-XI-lsN">
@@ -121,7 +166,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="imageView" destination="h3M-Mh-Ajp" id="EGc-Yc-jNz"/>
+                        <outlet property="collectionView" destination="rBu-BX-WRz" id="WdM-Ag-I0m"/>
                         <outlet property="noteDescription" destination="AFL-E1-Dbf" id="ad9-u2-KtP"/>
                         <outlet property="noteTitle" destination="5kk-oG-JUq" id="RlG-ch-Py9"/>
                     </connections>
