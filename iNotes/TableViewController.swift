@@ -15,6 +15,7 @@ class TableViewController: UITableViewController,NSFetchedResultsControllerDeleg
     var context : NSManagedObjectContext!
     
     var frc : NSFetchedResultsController<NSFetchRequestResult> = NSFetchedResultsController()
+    
     var imageFrc : NSFetchedResultsController<NSFetchRequestResult> = NSFetchedResultsController()
     
     func getFetchedResultsController() -> NSFetchedResultsController<NSFetchRequestResult>{
@@ -31,14 +32,17 @@ class TableViewController: UITableViewController,NSFetchedResultsControllerDeleg
     }
     
     func getImageFetchedResultsController(list:List) -> NSFetchedResultsController<NSFetchRequestResult>{
-        frc = NSFetchedResultsController(fetchRequest: imagesFetchRequest(list: list), managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
-        return frc
+        imageFrc = NSFetchedResultsController(fetchRequest: imagesFetchRequest(list: list), managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
+        return imageFrc
     }
     
     func imagesFetchRequest(list:List) -> NSFetchRequest<NSFetchRequestResult> {
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Image")
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Images")
+        let sortDescriptor = NSSortDescriptor(key: "noteId", ascending: true)
         
-        let whereDescriptor = NSPredicate(format: "noteId == %@",list.id)
+        let whereDescriptor:NSPredicate = NSPredicate(format: "noteId == %@",NSNumber(value: list.id))
+        
+        fetchRequest.sortDescriptors = [sortDescriptor]
         fetchRequest.predicate = whereDescriptor;
         return fetchRequest
     }
@@ -155,7 +159,7 @@ class TableViewController: UITableViewController,NSFetchedResultsControllerDeleg
             let itemController : ViewController = segue.destination as! ViewController
             let nItem : List = frc.object(at: indexPath!) as! List
             itemController.nNotes = nItem
-            imageFrc = getFetchedResultsController()
+            imageFrc = getImageFetchedResultsController(list: nItem)
             do {
                 try imageFrc.performFetch()
             } catch {

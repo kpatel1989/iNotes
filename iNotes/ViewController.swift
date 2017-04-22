@@ -18,9 +18,9 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
     var appDelegate:AppDelegate!
     var context:NSManagedObjectContext!
     let cellIdentifier:String = "imageCell"
-    var images: [Images]? = []
-    var uiImages: [UIImage]? = []
-    
+    var images: [Images] = []
+    var uiImages: [UIImage] = []
+    var imageEntity:NSEntityDescription!
 //    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     var nNotes : List? = nil
@@ -30,13 +30,19 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
         // Do any additional setup after loading the view, typically from a nib.
         appDelegate = (UIApplication.shared.delegate as! AppDelegate)
         context = appDelegate.persistentContainer.viewContext
+        imageEntity = NSEntityDescription.entity( forEntityName: "Images", in: context)
         if nNotes != nil {
             noteTitle.text = nNotes?.title
             noteDescription.text = nNotes?.desc
-            images?.forEach({ (image) in
-                let img = UIImage(data: (image.image?.data(using: String.Encoding.utf8))!)!
-                uiImages?.append(img)
+            images.forEach({ (image:Images) in
+                let img = UIImage(data: Data(base64Encoded: image.image!, options: Data.Base64DecodingOptions.ignoreUnknownCharacters)!)!
+                uiImages.append(img)
             })
+/*            for image:Images in images {
+                let img = UIImage(data: (image.image?.data(using: String.Encoding.utf8))!)!
+                uiImages.append(img)
+            }*/
+            
             collectionView.reloadData()
         }
     }
@@ -69,7 +75,7 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         picker.dismiss(animated: true, completion: nil)
 //        imageView.image = info[UIImagePickerControllerOriginalImage] as? UIImage
-        uiImages?.append(info[UIImagePickerControllerOriginalImage] as! UIImage)
+        uiImages.append(info[UIImagePickerControllerOriginalImage] as! UIImage)
         collectionView.reloadData()
 
     }
@@ -94,13 +100,13 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
         nNote.id = Int32(nNote.objectID.hash)
             
         print(nNote.desc!)
-        let imageEntity = NSEntityDescription.entity(forEntityName: "Images", in: context)
         
-        uiImages?.forEach({ (image) in
-            let data = UIImageJPEGRepresentation(image, 1)! as Data
+        uiImages.forEach({ (image) in
+            let data:Data = UIImagePNGRepresentation(image)!;
             
             let nImage = Images(entity: imageEntity!, insertInto: context)
-            nImage.image = String(data:data,encoding:.utf8);
+            let utfImage:String = data.base64EncodedString(options: Data.Base64EncodingOptions.lineLength64Characters)
+            nImage.image = utfImage
             nImage.noteId = nNote.id
         })
         
@@ -113,15 +119,26 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
         nNotes?.title = noteTitle.text
         nNotes?.desc = noteDescription.text
         
-        let imageEntity = NSEntityDescription.entity(forEntityName: "Image", in: context)
+        let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Images")
+        fetch.predicate = NSPredicate(format: "noteId == %@", NSNumber(value: (nNotes?.id)!))
+        let request = NSBatchDeleteRequest(fetchRequest: fetch)
         
-        uiImages?.forEach({ (image) in
-            let data = UIImageJPEGRepresentation(image, 1)! as Data
+        do {
+            let result = try context.execute(request)
+            print(result)
+        } catch {
+            print("Delete request error")
+        }
+        
+        uiImages.forEach({ (image) in
+            let data:Data = UIImagePNGRepresentation(image)!;
             
             let nImage = Images(entity: imageEntity!, insertInto: context)
-            nImage.image = String(data:data,encoding:.utf8);
+            let utfImage:String = data.base64EncodedString(options: Data.Base64EncodingOptions.lineLength64Characters)
+            nImage.image = utfImage
             nImage.noteId = (nNotes?.id)!
         })
+
         
         appDelegate.saveContext()
     }
@@ -137,7 +154,7 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return uiImages!.count
+        return uiImages.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -146,7 +163,7 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
 //        let image = images?[indexPath.row]
 //        let image = UIImage(data: (images?[indexPath.row].image?.data(using: String.Encoding.utf8))!)
 
-        let imageView = UIImageView(image: uiImages?[indexPath.row])
+        let imageView = UIImageView(image: uiImages[indexPath.row])
         imageView.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
         cell.addSubview(imageView)
         return cell
