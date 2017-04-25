@@ -18,5 +18,8 @@ extension Images {
 
     @NSManaged public var image: String?
     @NSManaged public var noteId: Int32
+    @NSManaged public var lat: Double
+    @NSManaged public var long: Double
+    @NSManaged public var address: String
 
 }

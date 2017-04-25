@@ -8,8 +8,9 @@
 
 import UIKit
 import CoreData
+import CoreLocation
 
-class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
+class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource,UIImagePickerControllerDelegate,UINavigationControllerDelegate, CLLocationManagerDelegate {
     
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var noteTitle: UITextField!
@@ -19,11 +20,12 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
     var context:NSManagedObjectContext!
     let cellIdentifier:String = "imageCell"
     var images: [Images] = []
-    var uiImages: [UIImage] = []
+    var uiImages: [[String:Any]] = []
     var imageEntity:NSEntityDescription!
-//    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-
+    var lastImage:[String:Any]!
     var nNotes : List? = nil
+    let regionRadius : CLLocationDistance = 1000
+    var locationManager:CLLocationManager!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,18 +33,16 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
         appDelegate = (UIApplication.shared.delegate as! AppDelegate)
         context = appDelegate.persistentContainer.viewContext
         imageEntity = NSEntityDescription.entity( forEntityName: "Images", in: context)
+        let nib = UINib(nibName: "ImageCollectionViewCell", bundle: nil)
+        collectionView.register(nib, forCellWithReuseIdentifier: cellIdentifier)
+        
         if nNotes != nil {
             noteTitle.text = nNotes?.title
             noteDescription.text = nNotes?.desc
             images.forEach({ (image:Images) in
                 let img = UIImage(data: Data(base64Encoded: image.image!, options: Data.Base64DecodingOptions.ignoreUnknownCharacters)!)!
-                uiImages.append(img)
+                uiImages.append(["image":img,"lat": image.lat, "long": image.long, "address" : image.address])
             })
-/*            for image:Images in images {
-                let img = UIImage(data: (image.image?.data(using: String.Encoding.utf8))!)!
-                uiImages.append(img)
-            }*/
-            
             collectionView.reloadData()
         }
     }
@@ -54,6 +54,28 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
     
     @IBAction func cancelBtn(_ sender: UIBarButtonItem) {
         back()
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+        lastImage = ["image" : info[UIImagePickerControllerOriginalImage] as! UIImage , "lat": 0.0, "long" : 0.0, "address" : ""]
+        
+        uiImages.append(lastImage)
+        
+        collectionView.reloadData()
+        locationManager = CLLocationManager();
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        locationManager.distanceFilter = kCLDistanceFilterNone
+        
+        let authSatus = CLLocationManager.authorizationStatus()
+        if (authSatus == .restricted || authSatus == .denied)    // restricted or denied
+        {
+            // Show alert and close the app
+        } else if(authSatus == .notDetermined) {                // not determined
+            locationManager.requestAlwaysAuthorization();
+        }
+        locationManager.requestLocation()
     }
     
     @IBAction func clickPhoto(_ sender: UIButton) {
@@ -72,12 +94,35 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
         }
     }
     
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-        picker.dismiss(animated: true, completion: nil)
-//        imageView.image = info[UIImagePickerControllerOriginalImage] as? UIImage
-        uiImages.append(info[UIImagePickerControllerOriginalImage] as! UIImage)
-        collectionView.reloadData()
-
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        CLGeocoder().reverseGeocodeLocation(manager.location!, completionHandler: {(placemarks, error)-> Void in
+            if (error != nil) {
+                print("Reverse geocoder failed with error" + (error?.localizedDescription)!)
+                return
+            }
+            
+            if (placemarks?.count)! > 0 {
+                let pm = (placemarks?[0])! as CLPlacemark
+                
+                    //stop updating location to save battery life
+                self.locationManager.stopUpdatingLocation()
+                self.uiImages[self.uiImages.count-1]["address"] = (pm.locality ?? "") + "," + (pm.postalCode ?? "") + "," + (pm.administrativeArea ?? "") + ", " + (pm.country ?? "")
+                
+            } else {
+                print("Problem with the data received from geocoder")
+            }
+            self.collectionView.reloadData()
+        })
+        if (lastImage != nil) {
+            
+            uiImages[uiImages.count-1]["lat"] = locationManager.location!.coordinate.latitude
+            uiImages[uiImages.count-1]["long"] = locationManager.location!.coordinate.longitude
+        }
+        
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        
     }
     
     @IBAction func saveBtn(_ sender: UIBarButtonItem) {
@@ -102,11 +147,14 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
         print(nNote.desc!)
         
         uiImages.forEach({ (image) in
-            let data:Data = UIImagePNGRepresentation(image)!;
+            let data:Data = UIImagePNGRepresentation(image["image"] as! UIImage)!;
             
             let nImage = Images(entity: imageEntity!, insertInto: context)
             let utfImage:String = data.base64EncodedString(options: Data.Base64EncodingOptions.lineLength64Characters)
             nImage.image = utfImage
+            nImage.lat = image["lat"] as! Double
+            nImage.long = image["long"] as! Double
+            nImage.address = image["address"] as! String
             nImage.noteId = nNote.id
         })
         
@@ -131,11 +179,14 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
         }
         
         uiImages.forEach({ (image) in
-            let data:Data = UIImagePNGRepresentation(image)!;
+            let data:Data = UIImagePNGRepresentation(image["image"] as! UIImage)!
             
             let nImage = Images(entity: imageEntity!, insertInto: context)
             let utfImage:String = data.base64EncodedString(options: Data.Base64EncodingOptions.lineLength64Characters)
             nImage.image = utfImage
+            nImage.lat = image["lat"] as! Double
+            nImage.long = image["long"] as! Double
+            nImage.address = image["address"] as! String
             nImage.noteId = (nNotes?.id)!
         })
 
@@ -158,14 +209,11 @@ class ViewController: UIViewController,UIImagePickerControllerDelegate,UINavigat
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath)
-        
-//        let image = images?[indexPath.row]
-//        let image = UIImage(data: (images?[indexPath.row].image?.data(using: String.Encoding.utf8))!)
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! ImageCollectionViewCell
 
-        let imageView = UIImageView(image: uiImages[indexPath.row])
-        imageView.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
-        cell.addSubview(imageView)
+        cell.image.image = uiImages[indexPath.row]["image"] as! UIImage
+        cell.locationCell.text = "at :" + String(describing:uiImages[indexPath.row]["address"]!)
+        
         return cell
     }
 }
